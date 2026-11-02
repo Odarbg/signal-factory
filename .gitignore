@@ -1,0 +1,22 @@
+# Dataset: IEEE-CIS competition rules forbid redistribution. Never commit.
+data/
+results/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.hypothesis/
+dist/
+*.egg-info/
+
+# Secrets
+.env
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
