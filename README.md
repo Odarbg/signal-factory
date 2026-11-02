@@ -30,3 +30,12 @@ wraps the Kaggle CLI. Everything under `data/` is gitignored.
 - The proposer's data access is enforced in code, not by prompting.
 - Public data only. No company data anywhere.
 - Test-first.
+
+## Development
+
+```sh
+uv sync --all-groups   # Python 3.12 via uv, all dependencies incl. dev tools
+make check             # pytest, ruff, mypy --strict
+```
+
+`make test`, `make lint` and `make typecheck` run the three parts separately.
