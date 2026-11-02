@@ -1,6 +1,6 @@
 # Dataset: IEEE-CIS competition rules forbid redistribution. Never commit.
-data/
-results/
+/data/
+/results/
 
 # Python
 .venv/
