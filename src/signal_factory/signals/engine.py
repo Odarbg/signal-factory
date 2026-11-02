@@ -44,9 +44,7 @@ def compute_signals(
     """``TransactionID`` plus one float64 column per spec id, sorted by ``TransactionID``."""
     con = connect(history)
     try:
-        ids = con.execute(
-            f"SELECT {ID_COLUMN} FROM {HISTORY_TABLE} ORDER BY {ID_COLUMN}"
-        ).df()
+        ids = con.execute(f"SELECT {ID_COLUMN} FROM {HISTORY_TABLE} ORDER BY {ID_COLUMN}").df()
         out = ids.set_index(ID_COLUMN)
         for batch in _batches(specs, batch_size):
             part = con.execute(build_query(batch, HISTORY_TABLE)).df().set_index(ID_COLUMN)

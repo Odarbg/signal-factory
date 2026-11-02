@@ -34,7 +34,9 @@ def test_recall_at_fpr_matches_sklearn_roc_curve() -> None:
     assert r.actual_fpr <= 0.01
     # the chosen threshold really realises that recall and FPR
     check = recall_at_threshold(scores, labels, r.threshold)
-    assert check.recall == pytest.approx(r.recall) and check.actual_fpr == pytest.approx(r.actual_fpr)
+    assert check.recall == pytest.approx(r.recall) and check.actual_fpr == pytest.approx(
+        r.actual_fpr
+    )
 
 
 def test_recall_at_fpr_with_ties_never_exceeds_budget() -> None:

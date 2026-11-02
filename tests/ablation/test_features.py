@@ -23,7 +23,12 @@ def _frame() -> pd.DataFrame:
 
 def test_drop_columns_are_the_identifiers_keys_and_label() -> None:
     assert set(DROP_COLUMNS) == {
-        "TransactionID", "TransactionDT", "uid", "day", "card1_addr1", "isFraud",
+        "TransactionID",
+        "TransactionDT",
+        "uid",
+        "day",
+        "card1_addr1",
+        "isFraud",
     }
 
 

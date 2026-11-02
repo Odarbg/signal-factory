@@ -42,8 +42,15 @@ def test_count_all_history_excludes_self_and_ties(con: duckdb.DuckDBPyConnection
     # Review Focus 2: rows 2/3 and 7/8 share a timestamp and must not see each other.
     got = values(con, spec())
     assert {k: got[k] for k in range(1, 10)} == {
-        1: 0, 2: 1, 3: 1, 4: 3, 5: 4,
-        6: 0, 7: 1, 8: 1, 9: 3,
+        1: 0,
+        2: 1,
+        3: 1,
+        4: 3,
+        5: 4,
+        6: 0,
+        7: 1,
+        8: 1,
+        9: 3,
     }
 
 
@@ -64,8 +71,15 @@ def test_count_distinct_with_filter(con: duckdb.DuckDBPyConnection) -> None:
     )
     got = values(con, s)
     assert {k: got[k] for k in range(1, 10)} == {
-        1: 0, 2: 1, 3: 1, 4: 2, 5: 2,
-        6: 0, 7: 1, 8: 1, 9: 1,
+        1: 0,
+        2: 1,
+        3: 1,
+        4: 2,
+        5: 2,
+        6: 0,
+        7: 1,
+        8: 1,
+        9: 1,
     }
 
 

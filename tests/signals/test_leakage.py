@@ -60,9 +60,7 @@ def later_rows(draw: st.DrawFn, history: pd.DataFrame) -> pd.DataFrame:
 @st.composite
 def signal_specs(draw: st.DrawFn) -> SignalSpec:
     aggregation = draw(
-        st.sampled_from(
-            ["count", "count_distinct", "sum", "mean", "max", "min", "time_since_last"]
-        )
+        st.sampled_from(["count", "count_distinct", "sum", "mean", "max", "min", "time_since_last"])
     )
     if aggregation in {"count", "time_since_last"}:
         column = "*"

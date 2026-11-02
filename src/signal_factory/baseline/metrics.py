@@ -38,7 +38,9 @@ def _rate(flagged: int, total: int) -> float:
     return float(flagged) / total if total else float("nan")
 
 
-def recall_at_threshold(scores: np.ndarray, labels: np.ndarray, threshold: float) -> ThresholdResult:
+def recall_at_threshold(
+    scores: np.ndarray, labels: np.ndarray, threshold: float
+) -> ThresholdResult:
     """Recall and realised FPR when flagging ``score >= threshold``."""
     pos, neg = _split(scores, labels)
     return ThresholdResult(
