@@ -35,4 +35,18 @@ def test_compute_row_b_cells_match_engine(tmp_path: Path, grid_history: pd.DataF
     ]
     expected = compute_signals(grid_history, chosen).set_index("TransactionID")
     for s in chosen:
-        pd.testing.assert_series_equal(df[s.id], expected[s.id], check_names=False)
+        pd.testing.assert_series_equal(
+            df[s.id].astype("float64"), expected[s.id], check_names=False
+        )
+
+
+def test_compute_row_b_stores_float32_and_sorted_ids(
+    tmp_path: Path, grid_history: pd.DataFrame
+) -> None:
+    src = tmp_path / "history.parquet"
+    grid_history.to_parquet(src, index=False)
+    out = tmp_path / "row_b.parquet"
+    compute_row_b(src, out, batch_size=500)
+    df = pd.read_parquet(out)
+    assert all(str(dt) == "float32" for c, dt in df.dtypes.items() if c != "TransactionID")
+    assert df["TransactionID"].is_monotonic_increasing

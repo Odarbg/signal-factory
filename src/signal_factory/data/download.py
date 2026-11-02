@@ -27,7 +27,7 @@ def _run(cmd: list[str]) -> subprocess.CompletedProcess[str]:
 
 
 def download(dest: Path, runner: Runner = _run) -> None:
-    """Download and unzip the two train CSVs into ``dest``; discard everything else."""
+    """Download the archive, extract only the two train CSVs into ``dest``, delete the archive."""
     dest.mkdir(parents=True, exist_ok=True)
     cmd = ["kaggle", "competitions", "download", "-c", COMPETITION, "-p", str(dest)]
     result = runner(cmd)
@@ -45,7 +45,4 @@ def download(dest: Path, runner: Runner = _run) -> None:
         for name in zf.namelist():
             if Path(name).name in TRAIN_FILES:
                 zf.extract(name, dest)
-    archive.unlink()
-    for path in dest.iterdir():
-        if path.is_file() and path.name not in TRAIN_FILES:
-            path.unlink()
+    archive.unlink()  # only the archive and the train files were ever written here

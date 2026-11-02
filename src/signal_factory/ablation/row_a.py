@@ -63,13 +63,22 @@ def _metrics(scores: np.ndarray, y: np.ndarray, threshold: float) -> Metrics:
     )
 
 
-def _features(df: pd.DataFrame, feature_parquets: Sequence[Path]) -> pd.DataFrame:
-    x = base_features(df)
-    for path in feature_parquets:
-        extra = pd.read_parquet(path)
-        extra = extra.set_index(ID_COLUMN).reindex(df[ID_COLUMN].to_numpy())
-        x = pd.concat([x.reset_index(drop=True), extra.reset_index(drop=True)], axis=1)
-    return x
+def _load_features(paths: Sequence[Path], needed_ids: np.ndarray) -> list[pd.DataFrame]:
+    """Read each feature file once, indexed by ``TransactionID``; every needed id must be present."""
+    loaded: list[pd.DataFrame] = []
+    for path in paths:
+        extra = pd.read_parquet(path).set_index(ID_COLUMN)
+        missing = int((~pd.Index(needed_ids).isin(extra.index)).sum())
+        if missing:
+            raise ValueError(f"{path} lacks {missing} TransactionIDs needed by the split")
+        loaded.append(extra)
+    return loaded
+
+
+def _features(df: pd.DataFrame, extras: Sequence[pd.DataFrame]) -> pd.DataFrame:
+    x = base_features(df).reset_index(drop=True)
+    ids = df[ID_COLUMN].to_numpy()
+    return pd.concat([x, *[e.reindex(ids).reset_index(drop=True) for e in extras]], axis=1)
 
 
 def run_row(
@@ -85,8 +94,11 @@ def run_row(
     dev = pd.read_parquet(split_dir / "dev.parquet")
     validation = pd.read_parquet(split_dir / "validation.parquet")
 
-    x_dev, y_dev = _features(dev, feature_parquets), labels(dev)
-    x_val, y_val = _features(validation, feature_parquets), labels(validation)
+    needed = np.concatenate([dev[ID_COLUMN].to_numpy(), validation[ID_COLUMN].to_numpy()])
+    extras = _load_features(feature_parquets, needed)
+    x_dev, y_dev = _features(dev, extras), labels(dev)
+    x_val, y_val = _features(validation, extras), labels(validation)
+    del extras
     scores = train_predict(x_dev, y_dev, x_val, params, seeds=seeds)
 
     frozen = recall_at_fpr(scores, y_val, FPR)

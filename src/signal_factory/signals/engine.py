@@ -9,8 +9,10 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 import duckdb
+import numpy as np
 import pandas as pd
 
 from signal_factory.signals.compile import ID_COLUMN, build_query
@@ -40,8 +42,13 @@ def compute_signals(
     history: Path | pd.DataFrame,
     specs: Sequence[SignalSpec],
     batch_size: int = 200,
+    dtype: Any = np.float64,
 ) -> pd.DataFrame:
-    """``TransactionID`` plus one float64 column per spec id, sorted by ``TransactionID``."""
+    """``TransactionID`` plus one float column per spec id (``dtype``), sorted by ``TransactionID``.
+
+    Counts, distinct counts and second deltas all fit float32; pass ``dtype=np.float32`` when
+    the result is wide (the row-B grid) to halve its memory.
+    """
     con = connect(history)
     try:
         ids = con.execute(f"SELECT {ID_COLUMN} FROM {HISTORY_TABLE} ORDER BY {ID_COLUMN}").df()
@@ -52,7 +59,7 @@ def compute_signals(
             part = part.reindex(index)
             parts.append(
                 pd.DataFrame(
-                    {spec.id: pd.to_numeric(part[spec.id]).astype("float64") for spec in batch},
+                    {spec.id: pd.to_numeric(part[spec.id]).astype(dtype) for spec in batch},
                     index=index,
                 )
             )

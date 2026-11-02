@@ -68,3 +68,28 @@ def test_run_row_with_no_extra_features_equals_run_row_a(
     a = run_row_a(synthetic_split, tmp_path / "a", seeds=(0,), params=FAST)
     b = run_row("A", synthetic_split, tmp_path / "b", [], seeds=(0,), params=FAST)
     assert a == b
+
+
+def test_run_row_reads_each_feature_parquet_once(
+    tmp_path: Path, synthetic_split: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    history = pd.read_parquet(synthetic_split / "history.parquet")
+    fpath = tmp_path / "extra.parquet"
+    pd.DataFrame({"TransactionID": history["TransactionID"], "extra_sig": 1.0}).to_parquet(
+        fpath, index=False
+    )
+    opened: list[str] = []
+    monkeypatch.setattr(pd, "read_parquet", record_then_call(opened))
+    run_row("B", synthetic_split, tmp_path / "out", [fpath], seeds=(0,), params=FAST)
+    assert opened.count(str(fpath)) == 1
+
+
+def test_run_row_rejects_feature_parquet_missing_rows(
+    tmp_path: Path, synthetic_split: Path
+) -> None:
+    history = pd.read_parquet(synthetic_split / "history.parquet")
+    partial = pd.DataFrame({"TransactionID": history["TransactionID"].iloc[:10], "extra_sig": 1.0})
+    fpath = tmp_path / "stale.parquet"
+    partial.to_parquet(fpath, index=False)
+    with pytest.raises(ValueError, match="stale.parquet"):
+        run_row("B", synthetic_split, tmp_path / "out", [fpath], seeds=(0,), params=FAST)

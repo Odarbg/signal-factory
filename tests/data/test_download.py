@@ -57,3 +57,24 @@ def test_download_raises_on_other_failures(tmp_path: Path) -> None:
 
     with pytest.raises(RuntimeError, match="401"):
         download(tmp_path, runner=fake_run)
+
+
+def test_download_leaves_unrelated_files_alone(tmp_path: Path) -> None:
+    keep = tmp_path / "notes.txt"
+    keep.write_text("mine")
+
+    def fake_run(cmd: list[str]) -> CompletedProcess[str]:
+        (tmp_path / "ieee-fraud-detection.zip").write_bytes(
+            make_zip(
+                {
+                    "train_transaction.csv": b"a",
+                    "train_identity.csv": b"b",
+                    "test_identity.csv": b"c",
+                }
+            )
+        )
+        return CompletedProcess(cmd, 0, "", "")
+
+    download(tmp_path, runner=fake_run)
+    assert keep.read_text() == "mine"
+    assert not (tmp_path / "test_identity.csv").exists()

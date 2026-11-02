@@ -81,3 +81,13 @@ def test_compute_signals_from_parquet_path(tmp_path: Path, tiny_history: pd.Data
     pd.testing.assert_frame_equal(
         compute_signals(path, SPECS_X5), compute_signals(tiny_history, SPECS_X5)
     )
+
+
+def test_compute_signals_dtype_can_be_float32(tiny_history: pd.DataFrame) -> None:
+    import numpy as np
+
+    out = compute_signals(tiny_history, SPECS_X5, dtype=np.float32)
+    assert all(out[s.id].dtype == "float32" for s in SPECS_X5)
+    wide = compute_signals(tiny_history, SPECS_X5)
+    for s in SPECS_X5:
+        pd.testing.assert_series_equal(out[s.id].astype("float64"), wide[s.id], check_names=False)
