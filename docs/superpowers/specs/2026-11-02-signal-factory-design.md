@@ -310,9 +310,15 @@ Steps 1–4 contain no LLM and are roughly half the work.
 
 - The `uid` collision rate (how many distinct `card1–6` combinations share a uid). Report
   it; if it is high, say so prominently and keep the guard as defined.
+  Measured by `signal-factory stats`; value recorded in `docs/results/plan-1-row-a.md`
+  (pending the owner's run on the real data as of 2026-11-02).
 - Whether featuretools' cutoff handling passes the leakage test (section 7 fallback).
+  Decision record: `docs/decisions/row-b-backend.md` (pending the time-boxed run).
 - LightGBM parameter set: chosen once on dev before signals exist, then frozen; the
-  values are recorded in the report.
+  values are recorded in the report. Chosen by `scripts/freeze_params.py` (train days
+  1–84, holdout 85–98, six candidates, PR-AUC) and committed as
+  `src/signal_factory/baseline/params.json`; the committed file is a placeholder until
+  that one-off run.
 
 ## 11. Left to the builder
 

@@ -43,11 +43,11 @@ Inputs the spec implies but no task's tests would otherwise exercise, most likel
 **Interfaces:**
 - Produces: the package `signal_factory`; commands `make test`, `make lint`, `make typecheck`.
 
-- [ ] **Step 1: Write `pyproject.toml`**
+- [x] **Step 1: Write `pyproject.toml`**
 
 `[project]` name `signal-factory`, `requires-python = ">=3.12"`, dependencies: `pandas`, `pyarrow`, `duckdb`, `lightgbm`, `scikit-learn`, `pydantic>=2`, `numpy`, `pyyaml`. Dev group: `pytest`, `hypothesis`, `mypy`, `ruff`, `pandas-stubs`, `types-PyYAML`. Build backend `hatchling`, `[tool.hatch.build.targets.wheel] packages = ["src/signal_factory"]`. `[tool.mypy] strict = true`, `[[tool.mypy.overrides]] module = ["lightgbm.*", "duckdb.*", "sklearn.*", "featuretools.*"] ignore_missing_imports = true`. `[tool.ruff] line-length = 100`, `target-version = "py312"`. `[tool.pytest.ini_options] testpaths = ["tests"]`.
 
-- [ ] **Step 2: Write the smoke test**
+- [x] **Step 2: Write the smoke test**
 
 ```python
 # tests/test_smoke.py
@@ -57,22 +57,22 @@ def test_package_imports() -> None:
     assert signal_factory.__version__ == "0.1.0"
 ```
 
-- [ ] **Step 3: Run it to verify it fails**
+- [x] **Step 3: Run it to verify it fails**
 
 Run: `uv sync --all-groups && uv run pytest tests/test_smoke.py -v`
 Expected: FAIL, `AttributeError: __version__`
 
-- [ ] **Step 4: Add `__version__ = "0.1.0"` to `src/signal_factory/__init__.py`; create empty `py.typed`**
+- [x] **Step 4: Add `__version__ = "0.1.0"` to `src/signal_factory/__init__.py`; create empty `py.typed`**
 
-- [ ] **Step 5: Write `Makefile`** with targets `test` (`uv run pytest`), `lint` (`uv run ruff check src tests`), `typecheck` (`uv run mypy src tests`), `check` (all three).
+- [x] **Step 5: Write `Makefile`** with targets `test` (`uv run pytest`), `lint` (`uv run ruff check src tests`), `typecheck` (`uv run mypy src tests`), `check` (all three).
 
-- [ ] **Step 6: Run `make check`**
+- [x] **Step 6: Run `make check`**
 
 Expected: 1 passed; ruff and mypy report no issues.
 
-- [ ] **Step 7: Add a "Development" section to `README.md`** listing `uv sync --all-groups`, `make check`.
+- [x] **Step 7: Add a "Development" section to `README.md`** listing `uv sync --all-groups`, `make check`.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add pyproject.toml uv.lock src tests Makefile README.md
@@ -89,7 +89,7 @@ git commit -m "Add Python project scaffold with uv, pytest, mypy strict and ruff
 **Interfaces:**
 - Produces: `download(dest: Path, runner: Callable[[list[str]], subprocess.CompletedProcess[str]] = subprocess.run) -> None`. Writes `train_transaction.csv` and `train_identity.csv` into `dest`. Raises `RulesNotAcceptedError(RuntimeError)` with a message containing the URL `https://www.kaggle.com/competitions/ieee-fraud-detection/rules` when the Kaggle CLI returns 403.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```python
 def test_download_invokes_kaggle_cli_and_unzips(tmp_path) -> None:
@@ -107,18 +107,18 @@ def test_download_explains_rules_on_403(tmp_path) -> None:
 
 `make_zip` is a 5-line helper in the test module using `zipfile`.
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `uv run pytest tests/data/test_download.py -v`
 Expected: FAIL, `ImportError`
 
-- [ ] **Step 3: Implement `download` in `download.py`**
+- [x] **Step 3: Implement `download` in `download.py`**
 
 Command: `["kaggle", "competitions", "download", "-c", "ieee-fraud-detection", "-p", str(dest)]`. Unzip with `zipfile`, keep only the two train files, delete the zip and any test files.
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
-- [ ] **Step 5: Commit** `git commit -m "Add Kaggle download script with rules-not-accepted guidance"`
+- [x] **Step 5: Commit** `git commit -m "Add Kaggle download script with rules-not-accepted guidance"`
 
 ---
 
@@ -133,11 +133,11 @@ Command: `["kaggle", "competitions", "download", "-c", "ieee-fraud-detection", "
 
 Definitions (spec §4, §5): `day = TransactionDT // 86400 - (min(TransactionDT) // 86400) + 1`; `D1n = day - D1`; `uid = f"{card1}_{addr1}_{D1n}"` and `card1_addr1 = f"{card1}_{addr1}"`, each **NULL if any component is NULL** (decision: a NULL key abstains; it must not form a shared group).
 
-- [ ] **Step 1: Create the fixtures**
+- [x] **Step 1: Create the fixtures**
 
 `mini_transaction.csv`: 8 rows, columns `TransactionID,isFraud,TransactionDT,TransactionAmt,ProductCD,card1,card2,addr1,D1,P_emaildomain`; include one row with empty `addr1`, one with empty `D1`, two rows sharing `TransactionDT`, and `TransactionDT` values 86400, 86460, 172800, …. `mini_identity.csv`: 3 rows, `TransactionID,DeviceInfo,id_30`, matching 3 of the 8 ids.
 
-- [ ] **Step 2: Write the failing tests**
+- [x] **Step 2: Write the failing tests**
 
 ```python
 def test_day_starts_at_one_and_uid_components() -> None:
@@ -162,15 +162,15 @@ def test_convert_joins_identity_and_downcasts(tmp_path) -> None:
     assert {"day", "uid", "card1_addr1"} <= set(df.columns)
 ```
 
-- [ ] **Step 3: Run tests to verify they fail**
+- [x] **Step 3: Run tests to verify they fail**
 
-- [ ] **Step 4: Implement `add_derived_columns` and `convert`**
+- [x] **Step 4: Implement `add_derived_columns` and `convert`**
 
 Read with `pd.read_csv`; left-merge identity on `TransactionID`; downcast float64 → float32; cast object → `string[pyarrow]`; write with `df.to_parquet(out_path, index=False)`.
 
-- [ ] **Step 5: Run tests to verify they pass; run `make check`**
+- [x] **Step 5: Run tests to verify they pass; run `make check`**
 
-- [ ] **Step 6: Commit** `git commit -m "Add CSV to Parquet conversion with uid, day and card1_addr1"`
+- [x] **Step 6: Commit** `git commit -m "Add CSV to Parquet conversion with uid, day and card1_addr1"`
 
 ---
 
@@ -186,7 +186,7 @@ Read with `pd.read_csv`; left-merge identity on `TransactionID`; downcast float6
   - `assign_period(day: int) -> Period` with boundaries `DEV_END = 98`, `VALIDATION_START = 106`, `VALIDATION_END = 138`, `FINAL_START = 146`, `FINAL_END = 183`; days 99–105 and 139–145 → `"gap"`; day > 183 → `ValueError`.
   - `write_split(all_parquet: Path, out_dir: Path) -> SplitCounts` writing `dev.parquet`, `validation.parquet`, `final.parquet` (period rows only, all columns including `isFraud`) and `history.parquet` (**all** rows, `isFraud` column dropped). `SplitCounts` is a dataclass with `dev`, `gap`, `validation`, `final`, `history: int`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```python
 @pytest.mark.parametrize("day,period", [(1,"dev"),(98,"dev"),(99,"gap"),(105,"gap"),(106,"validation"),(138,"validation"),(139,"gap"),(145,"gap"),(146,"final"),(183,"final")])
@@ -204,13 +204,13 @@ def test_write_split_files_are_disjoint_and_history_has_no_label(tmp_path) -> No
     assert set(hist.day) >= {99, 105, 139, 145}   # Review Focus 3: gap rows are history
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
-- [ ] **Step 3: Implement `split.py`** (pandas filter per period; `history` = all rows with `isFraud` dropped).
+- [x] **Step 3: Implement `split.py`** (pandas filter per period; `history` = all rows with `isFraud` dropped).
 
-- [ ] **Step 4: Run tests; `make check`**
+- [x] **Step 4: Run tests; `make check`**
 
-- [ ] **Step 5: Commit** `git commit -m "Add chronological split with 7-day gaps and label-free history"`
+- [x] **Step 5: Commit** `git commit -m "Add chronological split with 7-day gaps and label-free history"`
 
 ---
 
@@ -231,7 +231,7 @@ def test_write_split_files_are_disjoint_and_history_has_no_label(tmp_path) -> No
   - `SignalSpec.validate_columns(known: Iterable[str]) -> None` raising `ValueError` naming any unknown column.
   - `signal_json_schema() -> dict[str, Any]` = `SignalSpec.model_json_schema()`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```python
 def test_valid_count_spec_parses() -> None: SignalSpec.model_validate(VALID_COUNT)
@@ -247,13 +247,13 @@ def test_json_schema_has_required_fields() -> None:
     assert set(signal_json_schema()["required"]) >= {"id","version","hypothesis","entity_key","column","aggregation","window","inputs"}
 ```
 
-- [ ] **Step 2: Run to verify they fail**
+- [x] **Step 2: Run to verify they fail**
 
-- [ ] **Step 3: Implement `columns.py` and `spec.py`**
+- [x] **Step 3: Implement `columns.py` and `spec.py`**
 
-- [ ] **Step 4: Run tests; `make check`**
+- [x] **Step 4: Run tests; `make check`**
 
-- [ ] **Step 5: Commit** `git commit -m "Add depth-1 signal spec with validation and JSON schema"`
+- [x] **Step 5: Commit** `git commit -m "Add depth-1 signal spec with validation and JSON schema"`
 
 ---
 
@@ -275,11 +275,11 @@ Semantics to encode (spec §8.2 and decisions):
 - NULL key → `CASE WHEN h.<entity_key> IS NULL THEN NULL ELSE <window expr> END` (Review Focus 1).
 - String literals in filters are quoted with single quotes, doubled inside.
 
-- [ ] **Step 1: Write the fixture in `conftest.py`**
+- [x] **Step 1: Write the fixture in `conftest.py`**
 
 A `history` table of ~12 rows over 2 keys (`uid` values `"a"`, `"b"`, and one NULL), integer `TransactionDT` including a tie, `TransactionAmt`, `ProductCD` in {"W","C"}, `P_emaildomain`. Hand-compute expected values in the test file comments.
 
-- [ ] **Step 2: Write the failing tests**
+- [x] **Step 2: Write the failing tests**
 
 ```python
 def test_count_all_history_excludes_self_and_ties(con) -> None: ...   # Review Focus 2
@@ -294,15 +294,15 @@ def test_compile_is_deterministic() -> None: assert compile_signal(s) == compile
 
 Each test runs `con.execute(build_query([spec])).df()` and asserts the exact per-`TransactionID` values.
 
-- [ ] **Step 3: Run to verify they fail**
+- [x] **Step 3: Run to verify they fail**
 
-- [ ] **Step 4: Implement `compile.py`**
+- [x] **Step 4: Implement `compile.py`**
 
-- [ ] **Step 5: Run tests; `make check`**
+- [x] **Step 5: Run tests; `make check`**
 
-- [ ] **Step 6: Amend spec §8.2** "abstain on empty history" to "NULL on empty history for every aggregation except `count`, which is 0" with one line of reason. Commit the spec change with the code.
+- [x] **Step 6: Amend spec §8.2** "abstain on empty history" to "NULL on empty history for every aggregation except `count`, which is 0" with one line of reason. Commit the spec change with the code.
 
-- [ ] **Step 7: Commit** `git commit -m "Compile signal specs to DuckDB window SQL with strict-past semantics"`
+- [x] **Step 7: Commit** `git commit -m "Compile signal specs to DuckDB window SQL with strict-past semantics"`
 
 ---
 
@@ -315,7 +315,7 @@ Each test runs `con.execute(build_query([spec])).df()` and asserts the exact per
 - Consumes: `build_query` (Task 6), `history.parquet` layout (Task 4).
 - Produces: `compute_signals(history: Path | pd.DataFrame, specs: Sequence[SignalSpec], batch_size: int = 200) -> pd.DataFrame` with columns `TransactionID` plus one float column per spec id, in spec order; batches specs into several queries of at most `batch_size` expressions and joins on `TransactionID`; `connect(history: Path | pd.DataFrame) -> duckdb.DuckDBPyConnection` registering the table as `history`.
 
-- [ ] **Step 1: Write the engine tests**
+- [x] **Step 1: Write the engine tests**
 
 ```python
 def test_compute_signals_from_dataframe_matches_single_query(tiny_history) -> None: ...
@@ -325,7 +325,7 @@ def test_compute_signals_batches_and_preserves_order(tiny_history) -> None:
 def test_compute_signals_from_parquet_path(tmp_path, tiny_history) -> None: ...
 ```
 
-- [ ] **Step 2: Write the leakage property test (the acceptance gate)**
+- [x] **Step 2: Write the leakage property test (the acceptance gate)**
 
 ```python
 @settings(max_examples=200, deadline=None)
@@ -338,16 +338,16 @@ def test_appending_later_rows_never_changes_earlier_values(history, later, spec)
 
 Strategies in the same file: `histories()` builds 1–30 rows with `uid` from `{"a","b","c",None}`, `TransactionDT` integers 0–200_000 with duplicates allowed, `TransactionAmt` floats, `ProductCD` from `{"W","C"}`; `later_rows()` builds rows with `TransactionDT` strictly greater than the history's max; `signal_specs()` samples aggregation, window and optional filter over those columns with `entity_key="uid"`.
 
-- [ ] **Step 3: Run to verify they fail**
+- [x] **Step 3: Run to verify they fail**
 
-- [ ] **Step 4: Implement `engine.py`**
+- [x] **Step 4: Implement `engine.py`**
 
-- [ ] **Step 5: Run all signal tests; `make check`**
+- [x] **Step 5: Run all signal tests; `make check`**
 
 Run: `uv run pytest tests/signals -v`
 Expected: all pass including 200 Hypothesis examples.
 
-- [ ] **Step 6: Commit** `git commit -m "Add signal engine with Hypothesis leakage property test"`
+- [x] **Step 6: Commit** `git commit -m "Add signal engine with Hypothesis leakage property test"`
 
 ---
 
@@ -362,7 +362,7 @@ Expected: all pass including 200 Hypothesis examples.
 - Produces, in `learner.py`: `SEEDS: tuple[int, ...] = (0, 1, 2, 3, 4)`; `load_params() -> dict[str, Any]` reading `params.json`; `train_predict(x_train: pd.DataFrame, y_train: np.ndarray, x_eval: pd.DataFrame, params: dict[str, Any] | None = None, seeds: Sequence[int] = SEEDS) -> np.ndarray` returning seed-averaged probabilities; `train_predict_single(..., seed: int)`.
 - Produces: `scripts/freeze_params.py`, run once by the owner on dev (train days 1–84, holdout 85–98) over a fixed grid of 6 candidates (`num_leaves ∈ {31, 127}` × `learning_rate ∈ {0.05, 0.02}` with `n_estimators` 500/1000 respectively, plus `feature_fraction 0.5`, `bagging_fraction 0.8`, `min_child_samples 100`); writes the winner by holdout PR-AUC to `params.json` and prints the table. The committed `params.json` is the frozen value (spec §10).
 
-- [ ] **Step 1: Write the tests**
+- [x] **Step 1: Write the tests**
 
 ```python
 def test_base_features_drops_ids_and_label_and_categorises() -> None: ...
@@ -373,13 +373,13 @@ def test_train_predict_averages_seeds(synthetic_xy) -> None: ...   # mean of sin
 def test_load_params_has_required_keys() -> None: assert {"num_leaves","learning_rate","n_estimators"} <= load_params().keys()
 ```
 
-- [ ] **Step 2: Run to verify they fail**
+- [x] **Step 2: Run to verify they fail**
 
-- [ ] **Step 3: Implement `features.py`, `learner.py`, a placeholder `params.json` (`num_leaves 31, learning_rate 0.05, n_estimators 500`, plus the fixed fractions) and `scripts/freeze_params.py`**
+- [x] **Step 3: Implement `features.py`, `learner.py`, a placeholder `params.json` (`num_leaves 31, learning_rate 0.05, n_estimators 500`, plus the fixed fractions) and `scripts/freeze_params.py`**
 
-- [ ] **Step 4: Run tests; `make check`**
+- [x] **Step 4: Run tests; `make check`**
 
-- [ ] **Step 5: Commit** `git commit -m "Add fixed-parameter LightGBM learner and parameter freeze script"`
+- [x] **Step 5: Commit** `git commit -m "Add fixed-parameter LightGBM learner and parameter freeze script"`
 
 - [ ] **Step 6 (owner, once data is downloaded): run `uv run python scripts/freeze_params.py data/split/dev.parquet`, commit the resulting `params.json` with the printed table in the commit message**
 
@@ -393,7 +393,7 @@ def test_load_params_has_required_keys() -> None: assert {"num_leaves","learning
 **Interfaces:**
 - Produces: `recall_at_fpr(scores: np.ndarray, labels: np.ndarray, fpr: float = 0.01) -> ThresholdResult` (dataclass: `threshold: float, recall: float, actual_fpr: float`) choosing the **smallest threshold whose actual FPR ≤ fpr** (conservative under ties); `recall_at_threshold(scores, labels, threshold) -> ThresholdResult` (flag = `score >= threshold`); `pr_auc(scores, labels) -> float`; `roc_auc(scores, labels) -> float` (both via scikit-learn); `seen_mask(eval_uids: pd.Series, train_uids: Iterable[str]) -> np.ndarray` (bool; NULL uid → `False`).
 
-- [ ] **Step 1: Write the tests**
+- [x] **Step 1: Write the tests**
 
 ```python
 def test_recall_at_fpr_matches_sklearn_roc_curve() -> None: ...
@@ -406,13 +406,13 @@ def test_seen_mask_null_uid_is_unseen() -> None:                       # Review 
 def test_pr_auc_and_roc_auc_match_sklearn() -> None: ...
 ```
 
-- [ ] **Step 2: Run to verify they fail**
+- [x] **Step 2: Run to verify they fail**
 
-- [ ] **Step 3: Implement `metrics.py`**
+- [x] **Step 3: Implement `metrics.py`**
 
-- [ ] **Step 4: Run tests; `make check`**
+- [x] **Step 4: Run tests; `make check`**
 
-- [ ] **Step 5: Commit** `git commit -m "Add recall-at-FPR with frozen thresholds and seen/unseen masks"`
+- [x] **Step 5: Commit** `git commit -m "Add recall-at-FPR with frozen thresholds and seen/unseen masks"`
 
 ---
 
@@ -425,7 +425,7 @@ def test_pr_auc_and_roc_auc_match_sklearn() -> None: ...
 - Consumes: `recall_at_threshold` (Task 9).
 - Produces: `paired_recall_diff(scores_a, scores_b, labels, threshold_a: float, threshold_b: float, n_resamples: int = 1000, seed: int = 0) -> BootstrapResult` (dataclass: `mean_diff: float, lo: float, hi: float, n_resamples: int`), percentile 2.5/97.5 interval of recall(b) − recall(a) over row resamples with replacement, the **same** resample applied to both; `N_RESAMPLES = 1000`.
 
-- [ ] **Step 1: Write the tests**
+- [x] **Step 1: Write the tests**
 
 ```python
 def test_identical_scores_give_zero_interval() -> None: r = paired_recall_diff(s, s, y, t, t); assert r.lo <= 0 <= r.hi and abs(r.mean_diff) < 1e-12
@@ -433,13 +433,13 @@ def test_interval_contains_known_difference_on_synthetic() -> None: ...
 def test_is_seed_deterministic() -> None: ...
 ```
 
-- [ ] **Step 2: Run to verify they fail**
+- [x] **Step 2: Run to verify they fail**
 
-- [ ] **Step 3: Implement `bootstrap.py`** (NumPy `default_rng(seed).integers`, vectorised over resamples).
+- [x] **Step 3: Implement `bootstrap.py`** (NumPy `default_rng(seed).integers`, vectorised over resamples).
 
-- [ ] **Step 4: Run tests; `make check`**
+- [x] **Step 4: Run tests; `make check`**
 
-- [ ] **Step 5: Commit** `git commit -m "Add paired bootstrap for recall differences"`
+- [x] **Step 5: Commit** `git commit -m "Add paired bootstrap for recall differences"`
 
 ---
 
@@ -456,7 +456,7 @@ def test_is_seed_deterministic() -> None: ...
   - `run_row_a(split_dir: Path, out_dir: Path, seeds=SEEDS) -> RowResult` (dataclass: `name: str, validation: Metrics, validation_seen: Metrics, validation_unseen: Metrics, threshold: float, params: dict`) where `Metrics` = `recall, actual_fpr, pr_auc, roc_auc, n`. Trains on `dev.parquet`, freezes the threshold on all validation rows, writes `out_dir/row_a.json`. **Never reads `final.parquet`.**
   - `cli.py`: `signal-factory convert RAW OUT`, `signal-factory split ALL OUT_DIR`, `signal-factory stats ALL`, `signal-factory row-a SPLIT_DIR OUT_DIR` (argparse).
 
-- [ ] **Step 1: Write the tests**
+- [x] **Step 1: Write the tests**
 
 ```python
 def test_uid_collision_rate_counts_multi_card_uids() -> None: ...
@@ -471,13 +471,13 @@ def test_cli_row_a_invokes_runner(monkeypatch) -> None: ...
 
 `synthetic_split` is a fixture writing a 400-row synthetic dataset through `write_split` (Task 4) with a few informative columns.
 
-- [ ] **Step 2: Run to verify they fail**
+- [x] **Step 2: Run to verify they fail**
 
-- [ ] **Step 3: Implement `stats.py`, `row_a.py`, `cli.py`**
+- [x] **Step 3: Implement `stats.py`, `row_a.py`, `cli.py`**
 
-- [ ] **Step 4: Run tests; `make check`**
+- [x] **Step 4: Run tests; `make check`**
 
-- [ ] **Step 5: Commit** `git commit -m "Add row A validation run, uid collision statistic and CLI"`
+- [x] **Step 5: Commit** `git commit -m "Add row A validation run, uid collision statistic and CLI"`
 
 - [ ] **Step 6 (owner, with real data): `signal-factory stats data/parquet/all.parquet` and `signal-factory row-a data/split results/row_a`; paste the collision rate and row-A validation metrics into `docs/results/plan-1-row-a.md` and commit that file (aggregate numbers only).**
 
@@ -495,7 +495,7 @@ def test_cli_row_a_invokes_runner(monkeypatch) -> None: ...
   - `compute_row_b(history: Path, out_path: Path, batch_size: int = 150) -> int` writing a Parquet of `TransactionID` + all grid columns, computed by `compute_signals` in batches, returning the column count.
   - `scripts/try_featuretools.py`: time-boxed featuretools DFS attempt on the same grid with cutoff times; prints wall time and whether a 2,000-row sample matches `compute_row_b` values; exits non-zero on mismatch or timeout (8 h).
 
-- [ ] **Step 1: Write the grid tests**
+- [x] **Step 1: Write the grid tests**
 
 ```python
 def test_grid_size_and_shape() -> None:
@@ -508,15 +508,15 @@ def test_grid_contains_expected_members() -> None:
 def test_grid_specs_all_validate() -> None: ...
 ```
 
-- [ ] **Step 2: Write the compute test** (`compute_row_b` on `tiny_history` writes the expected number of columns; values for two chosen cells equal `compute_signals` on the same specs).
+- [x] **Step 2: Write the compute test** (`compute_row_b` on `tiny_history` writes the expected number of columns; values for two chosen cells equal `compute_signals` on the same specs).
 
-- [ ] **Step 3: Run to verify they fail**
+- [x] **Step 3: Run to verify they fail**
 
-- [ ] **Step 4: Implement `grid.py`, `compute.py`, `scripts/try_featuretools.py`** (featuretools added as an optional dependency group `routine-ft`).
+- [x] **Step 4: Implement `grid.py`, `compute.py`, `scripts/try_featuretools.py`** (featuretools added as an optional dependency group `routine-ft`).
 
-- [ ] **Step 5: Run tests; `make check`**
+- [x] **Step 5: Run tests; `make check`**
 
-- [ ] **Step 6: Commit** `git commit -m "Add row B routine-aggregation grid computed by the signal engine"`
+- [x] **Step 6: Commit** `git commit -m "Add row B routine-aggregation grid computed by the signal engine"`
 
 - [ ] **Step 7 (owner, with real data): run `scripts/try_featuretools.py` under the 8-hour time box; record outcome (finished / timed out / leakage mismatch) and the engine's own wall time in `docs/decisions/row-b-backend.md`; commit. Per spec §7 either outcome is acceptable and the report will say which backend produced row B.**
 
@@ -529,7 +529,7 @@ def test_grid_specs_all_validate() -> None: ...
 **Files:**
 - Modify: `README.md` (status, how to reproduce rows A and B on validation), `docs/superpowers/specs/2026-11-02-signal-factory-design.md` (§10 open items: fill in the uid collision rate and the row-B backend decision)
 
-- [ ] **Step 1: Update README and spec §10 with measured values (aggregate numbers only)**
+- [x] **Step 1: Update README and spec §10 with measured values (aggregate numbers only)** — done 2026-11-02 for reproduction steps and pointers; measured values await the owner's data runs
 - [ ] **Step 2: `make check`; confirm `git status` shows nothing under `data/` or `results/`**
 - [ ] **Step 3: Commit** `git commit -m "Close plan 1: rows A and B reproducible on validation"`
 

@@ -14,7 +14,31 @@ A negative answer, reliably shown, counts as a result.
 
 ## Status
 
-Design stage. See `docs/superpowers/specs/2026-11-02-signal-factory-design.md`.
+Plan 1 (foundations) code complete, 2026-11-02: data pipeline, leakage-tested signal
+engine, fixed LightGBM learner, pre-registered metrics, paired bootstrap, row A runner
+and the row B grid. Measured values (uid collision rate, frozen LightGBM parameters,
+row A and B validation metrics, row B backend) are pending the owner's runs on the real
+data; see `docs/results/` and `docs/decisions/row-b-backend.md`. Design:
+`docs/superpowers/specs/2026-11-02-signal-factory-design.md`.
+
+## Reproducing rows A and B on validation
+
+Nothing below reads `final.parquet`; the final period is touched once, in plan 2.
+
+```sh
+uv sync --all-groups
+uv run python -c "from pathlib import Path; from signal_factory.data.download import download; download(Path('data/raw'))"
+uv run signal-factory convert data/raw data/parquet/all.parquet
+uv run signal-factory split data/parquet/all.parquet data/split
+uv run signal-factory stats data/parquet/all.parquet            # uid collision rate
+uv run python scripts/freeze_params.py data/split/dev.parquet   # once; commit params.json
+uv run signal-factory row-a data/split results/row_a           # row A on validation
+uv run python -c "from pathlib import Path; from signal_factory.routine.compute import compute_row_b; compute_row_b(Path('data/split/history.parquet'), Path('data/features/row_b.parquet'))"
+uv run python -c "from pathlib import Path; from signal_factory.ablation.row_a import run_row; print(run_row('B', Path('data/split'), Path('results/row_b'), [Path('data/features/row_b.parquet')]))"
+```
+
+Optional featuretools comparison (time-boxed, spec §7): `uv sync --group routine-ft`
+then `uv run python scripts/try_featuretools.py data/split/history.parquet`.
 
 ## Data
 
