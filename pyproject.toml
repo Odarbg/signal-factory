@@ -26,6 +26,9 @@ dev = [
     "pandas-stubs",
     "types-PyYAML",
 ]
+routine-ft = [
+    "featuretools",
+]
 
 [build-system]
 requires = ["hatchling"]

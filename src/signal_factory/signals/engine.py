@@ -45,11 +45,18 @@ def compute_signals(
     con = connect(history)
     try:
         ids = con.execute(f"SELECT {ID_COLUMN} FROM {HISTORY_TABLE} ORDER BY {ID_COLUMN}").df()
-        out = ids.set_index(ID_COLUMN)
+        index = ids.set_index(ID_COLUMN).index
+        parts: list[pd.DataFrame] = []
         for batch in _batches(specs, batch_size):
             part = con.execute(build_query(batch, HISTORY_TABLE)).df().set_index(ID_COLUMN)
-            for spec in batch:
-                out[spec.id] = pd.to_numeric(part[spec.id]).astype("float64")
+            part = part.reindex(index)
+            parts.append(
+                pd.DataFrame(
+                    {spec.id: pd.to_numeric(part[spec.id]).astype("float64") for spec in batch},
+                    index=index,
+                )
+            )
     finally:
         con.close()
+    out = pd.concat([ids.set_index(ID_COLUMN), *parts], axis=1)
     return out.reset_index()
