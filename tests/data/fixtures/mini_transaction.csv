@@ -1,0 +1,9 @@
+TransactionID,isFraud,TransactionDT,TransactionAmt,ProductCD,card1,card2,addr1,D1,P_emaildomain
+1,0,86400,50.0,W,1000,111,300,0,gmail.com
+2,0,86460,20.5,C,1000,111,300,0,gmail.com
+3,1,172800,300.0,W,2000,222,,5,yahoo.com
+4,0,172800,12.25,C,2000,222,400,,hotmail.com
+5,0,259200,75.0,W,3000,333,500,2,gmail.com
+6,0,259260,80.0,W,3000,333,500,2,gmail.com
+7,1,345600,999.999,C,4000,444,600,1,
+8,0,432000,10.0,W,1000,111,300,4,gmail.com
