@@ -220,8 +220,10 @@ recomputing, must leave every earlier value unchanged. This test is an acceptanc
 for the engine and for row B.
 
 Other tests: each aggregation and window against hand-computed fixtures; filter
-semantics; abstain on empty history; invalid specs rejected with reasons; compiled SQL
-is deterministic.
+semantics; NULL on empty history for every aggregation except `count`, which is 0
+(builder decision 2026-11-02: zero prior rows is information, not absence of it; a
+NULL entity key still yields NULL for every aggregation); invalid specs rejected with
+reasons; compiled SQL is deterministic.
 
 ### 8.3 Baseline, metrics, bootstrap
 
