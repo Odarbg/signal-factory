@@ -101,7 +101,9 @@ def test_write_split_counts(tmp_path: Path) -> None:
     counts = write_split(src, tmp_path / "split")
     expected = SplitCounts(
         dev=int((df.day <= 98).sum()),
-        gap=int(((df.day >= 99) & (df.day <= 105)).sum() + ((df.day >= 139) & (df.day <= 145)).sum()),
+        gap=int(
+            ((df.day >= 99) & (df.day <= 105)).sum() + ((df.day >= 139) & (df.day <= 145)).sum()
+        ),
         validation=int(((df.day >= 106) & (df.day <= 138)).sum()),
         final=int(((df.day >= 146) & (df.day <= 183)).sum()),
         history=len(df),
