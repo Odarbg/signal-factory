@@ -1,13 +1,19 @@
 """Time-boxed featuretools attempt at the row-B grid (spec §7, §8.4, §10).
 
-Builds an EntitySet with ``TransactionDT`` as the time index and a cutoff time per row
-one second before its own ``TransactionDT`` (strict past, ties excluded), runs DFS with
-the grid's primitives and training windows, and compares a sample of cells against
-``compute_row_b``. Prints wall time; exits non-zero on mismatch or when the 8-hour time
-box is exceeded. Either outcome is acceptable and is recorded in
-``docs/decisions/row-b-backend.md``.
+What this script can and cannot show. It builds an EntitySet with ``TransactionDT`` as
+the time index and a cutoff time per row one second before its own ``TransactionDT``
+(strict past, ties excluded), runs DFS for a **probe** of the grid (2 keys × 3 windows ×
+4 primitives) on a sampled cutoff set, compares every probe cell with the signal engine,
+and prints wall time. It does not compute the 1,626-column grid; a "finished" verdict is
+an extrapolation from the probe's wall time and is recorded as such in
+``docs/decisions/row-b-backend.md``. Exit codes: 0 match, 1 mismatch, 2 time box
+exceeded, 3 featuretools/woodwork unusable in this environment.
 
-    uv sync --group routine-ft
+Finding 2026-11-02: with pandas 3.1.0, woodwork 0.31.0 does not retain its schema after
+``DataFrame.ww.init`` (``df.ww.schema`` is ``None``), so featuretools 1.31.0 cannot build
+an EntitySet here. The preflight below detects that and exits 3.
+
+    uv sync --all-groups          # includes the routine-ft group
     uv run python scripts/try_featuretools.py data/split/history.parquet --sample 2000
 """
 
@@ -17,7 +23,6 @@ import argparse
 import sys
 import time
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -128,11 +133,70 @@ def run_dfs(
     return pd.DataFrame(matrix)
 
 
+def woodwork_preflight() -> str | None:
+    """Return a reason featuretools cannot run here, or ``None`` when it can."""
+    try:
+        import featuretools as ft
+        import woodwork as ww
+    except ImportError as exc:  # pragma: no cover - depends on the optional group
+        return f"import failed: {exc} (run `uv sync --all-groups`)"
+    probe = pd.DataFrame({"id": [1, 2], "x": [1.0, 2.0]})
+    probe.ww.init(index="id")
+    if probe.ww.schema is None:
+        return (
+            f"woodwork {ww.__version__} does not retain a schema under pandas {pd.__version__}; "
+            f"featuretools {ft.__version__} cannot build an EntitySet"
+        )
+    return None
+
+
+FT_COLUMN = {
+    "count": "{key}.COUNT(transactions)",
+    "time_since_last": "{key}.TIME_SINCE_LAST(transactions.TransactionDT_ts)",
+    "mean": "{key}.MEAN(transactions.{numeric})",
+    "count_distinct": "{key}.NUM_UNIQUE(transactions.{nunique})",
+}
+
+
+def _compare(matrix: pd.DataFrame, engine: pd.DataFrame, key: str, window_name: str) -> list[str]:
+    """One line per probe primitive whose featuretools cells differ from the engine's."""
+    out: list[str] = []
+    for aggregation, template in FT_COLUMN.items():
+        ft_name = template.format(
+            key=key, numeric=GRID_NUMERIC_COLUMNS[0], nunique=GRID_COUNT_DISTINCT_COLUMNS[0]
+        )
+        column = (
+            "star"
+            if aggregation in ("count", "time_since_last")
+            else (
+                GRID_NUMERIC_COLUMNS[0] if aggregation == "mean" else GRID_COUNT_DISTINCT_COLUMNS[0]
+            )
+        )
+        eng_name = f"ft__{key}__{window_name}__{aggregation}__{column}"
+        if ft_name not in matrix.columns:
+            out.append(f"{key}/{window_name}/{aggregation}: featuretools produced no {ft_name}")
+            continue
+        ft_values = pd.to_numeric(matrix[ft_name], errors="coerce")
+        eng_values = engine[eng_name].reindex(ft_values.index)
+        if aggregation == "count":
+            ft_values, eng_values = ft_values.fillna(0), eng_values.fillna(0)
+        both_null = ft_values.isna() & eng_values.isna()
+        differ = ~both_null & ~np.isclose(ft_values.fillna(-1), eng_values.fillna(-1), atol=1e-4)
+        if differ.any():
+            out.append(f"{key}/{window_name}/{aggregation}: {int(differ.sum())} cells differ")
+    return out
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("history_parquet", type=Path)
     parser.add_argument("--sample", type=int, default=2000)
     args = parser.parse_args()
+
+    reason = woodwork_preflight()
+    if reason is not None:
+        print(f"FEATURETOOLS UNAVAILABLE: {reason}")
+        return 3
 
     start = time.perf_counter()
     history = pd.read_parquet(args.history_parquet)
@@ -163,12 +227,7 @@ def main() -> int:
             print(
                 f"{key} {window_name}: featuretools matrix {matrix.shape} after {time.perf_counter() - start:.0f}s"
             )
-            ft_count = matrix[f"{key}.COUNT(transactions)"]
-            eng_count = engine[f"ft__{key}__{window_name}__count__star"].reindex(ft_count.index)
-            # featuretools counts include the row's own group members before the cutoff; engine excludes NULL keys
-            diff: Any = (ft_count.fillna(0) - eng_count.fillna(0)).abs()
-            if (diff > 0).any():
-                mismatches.append(f"{key}/{window_name}: {(diff > 0).sum()} count cells differ")
+            mismatches.extend(_compare(matrix, engine, key, window_name))
 
     elapsed = time.perf_counter() - start
     print(f"wall time {elapsed:.0f}s; mismatches: {mismatches or 'none'}")

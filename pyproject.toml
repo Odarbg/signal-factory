@@ -28,6 +28,7 @@ dev = [
 ]
 routine-ft = [
     "featuretools",
+    "setuptools<81",  # woodwork imports pkg_resources, removed in setuptools 81
 ]
 
 [build-system]
@@ -41,7 +42,7 @@ packages = ["src/signal_factory"]
 strict = true
 
 [[tool.mypy.overrides]]
-module = ["lightgbm.*", "duckdb.*", "sklearn.*", "featuretools.*"]
+module = ["lightgbm.*", "duckdb.*", "sklearn.*", "featuretools.*", "woodwork.*"]
 ignore_missing_imports = true
 
 [tool.ruff]
