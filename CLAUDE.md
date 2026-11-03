@@ -14,11 +14,17 @@ aggregations, measured fairly on unseen later time periods? Read, in order:
 
 ## Current state
 
-- Phase 0 done: design approved after builder review, plan 1 written.
-- Next: execute plan 1 from Task 1 with `superpowers:executing-plans` (native execution
-  was recommended and chosen) unless the plan file shows checked boxes further along.
-- Plan 2 (proposer, ablation runner, final evaluation, report) is written only after
-  plan 1 closes.
+- Plan 1 (foundations) closed 2026-11-03 on the real data; results in `docs/results/`.
+- Plan 2 written 2026-11-03: `docs/superpowers/plans/2026-11-03-signal-factory-plan-2-proposer-and-final.md`
+  (proposer, selection, final evaluation, report; 14 tasks).
+- Next: execute plan 2 from Task 1 with `superpowers:executing-plans` (native execution
+  chosen by the owner on 2026-11-03) unless the plan file shows checked boxes further
+  along. Collaboration mode for all of plan 2 was also chosen on 2026-11-03: Claude writes
+  tests and implements, commits on main; do not re-ask per task. Owner gates stay:
+  confirming `domain_notes.md` before arm D runs, and the real `propose`, `select`,
+  `run-final` commands.
+- Local data: Kaggle CSVs in `~/.kaggle/`, copied to `data/raw/`; `data/split/`,
+  `data/parquet/all.parquet` and `data/features/row_b.parquet` exist on the owner's laptop.
 
 ## How the owner works
 
