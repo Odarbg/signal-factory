@@ -14,12 +14,14 @@ A negative answer, reliably shown, counts as a result.
 
 ## Status
 
-Plan 1 (foundations) code complete, 2026-11-02: data pipeline, leakage-tested signal
-engine, fixed LightGBM learner, pre-registered metrics, paired bootstrap, row A runner
-and the row B grid. Measured values (uid collision rate, frozen LightGBM parameters,
-row A and B validation metrics, row B backend) are pending the owner's runs on the real
-data; see `docs/results/` and `docs/decisions/row-b-backend.md`. Design:
-`docs/superpowers/specs/2026-11-02-signal-factory-design.md`.
+Plan 1 (foundations) closed 2026-11-03: data pipeline, leakage-tested signal engine,
+fixed LightGBM learner, pre-registered metrics, paired bootstrap, row A runner and the
+row B grid, all run on the real data. Measured on validation (days 106–138) at FPR ≤ 1%:
+row A (431 raw columns) recall 0.533, PR-AUC 0.625; row B (plus 1,626 routine
+aggregations) recall 0.538, PR-AUC 0.622. uid collision rate 2.18%. Details in
+`docs/results/plan-1-row-a.md`, `docs/results/plan-1-rows-a-b.md` and
+`docs/decisions/row-b-backend.md`. Next: plan 2 (proposer, ablation runner, final
+evaluation). Design: `docs/superpowers/specs/2026-11-02-signal-factory-design.md`.
 
 ## Reproducing rows A and B on validation
 
@@ -44,8 +46,8 @@ then `uv run python scripts/try_featuretools.py data/split/history.parquet`.
 
 IEEE-CIS Fraud Detection (Kaggle). The competition rules allow non-commercial,
 academic use and forbid redistribution, so the dataset is never committed. Accept the
-rules on Kaggle under your own account, then use the download script (to come) which
-wraps the Kaggle CLI. Everything under `data/` is gitignored.
+rules on Kaggle under your own account, then use the download script
+(`signal_factory.data.download`), which wraps the Kaggle CLI. Everything under `data/` is gitignored.
 
 ## Principles
 

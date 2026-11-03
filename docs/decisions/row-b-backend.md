@@ -31,10 +31,10 @@ says "plan the engine path from the start; the grid is the same either way".
 |---|---|
 | featuretools / woodwork / pandas | 1.31.0 / 0.31.0 / 3.1.0 |
 | Can featuretools build an EntitySet here? | **No.** `DataFrame.ww.init()` returns with `ww.schema is None` under pandas 3.1.0, on a two-column frame; `EntitySet.add_dataframe` then raises `WoodworkNotInitError`. woodwork declares `pandas >= 2.0.0` with no upper bound. |
-| Probe finished within the time box? | Not applicable; it cannot start. The script exits 3 on this condition. |
+| Probe finished within the time box? | Not applicable; it cannot start. The script exits 3 on this condition, both on synthetic data (2026-11-02) and on the real `data/split/history.parquet` (2026-11-03, same message, exit 3 within seconds). |
 | Sampled cells matched the engine? | Not measurable here. |
 | featuretools wall time | – |
-| Engine wall time for the full grid on real `history.parquet` | *(owner fills in after `compute_row_b`)* |
+| Engine wall time for the full grid on real `history.parquet` | 1,585 s (26 min 25 s) on the builder's laptop, 2026-11-03, for 590,540 rows × 1,626 signals in 11 batches of 150, while the parameter freeze and row A were training concurrently on the same machine. The output is 794 MB of float32 Parquet. Append-later-rows check on 40 sampled signals (history truncated at day 60 vs full, 223,738 rows): 0 mismatches. |
 | **Backend used for row B** | **Signal engine** (`compute_row_b`). |
 
 Rationale: the engine path was pre-registered as an acceptable backend for the identical

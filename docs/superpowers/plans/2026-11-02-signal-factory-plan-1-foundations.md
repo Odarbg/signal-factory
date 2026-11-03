@@ -479,7 +479,7 @@ def test_cli_row_a_invokes_runner(monkeypatch) -> None: ...
 
 - [x] **Step 5: Commit** `git commit -m "Add row A validation run, uid collision statistic and CLI"`
 
-- [ ] **Step 6 (owner, with real data): `signal-factory stats data/parquet/all.parquet` and `signal-factory row-a data/split results/row_a`; paste the collision rate and row-A validation metrics into `docs/results/plan-1-row-a.md` and commit that file (aggregate numbers only).**
+- [x] **Step 6 (owner, with real data): `signal-factory stats data/parquet/all.parquet` and `signal-factory row-a data/split results/row_a`; paste the collision rate and row-A validation metrics into `docs/results/plan-1-row-a.md` and commit that file (aggregate numbers only).**
 
 ---
 
@@ -518,9 +518,9 @@ def test_grid_specs_all_validate() -> None: ...
 
 - [x] **Step 6: Commit** `git commit -m "Add row B routine-aggregation grid computed by the signal engine"`
 
-- [ ] **Step 7 (owner, with real data): run `scripts/try_featuretools.py` under the 8-hour time box; record outcome (finished / timed out / leakage mismatch) and the engine's own wall time in `docs/decisions/row-b-backend.md`; commit. Per spec §7 either outcome is acceptable and the report will say which backend produced row B.**
+- [x] **Step 7 (owner, with real data): run `scripts/try_featuretools.py` under the 8-hour time box; record outcome (finished / timed out / leakage mismatch) and the engine's own wall time in `docs/decisions/row-b-backend.md`; commit. Per spec §7 either outcome is acceptable and the report will say which backend produced row B.**
 
-- [ ] **Step 8 (owner, with real data): `compute_row_b` on `data/split/history.parquet` → `data/features/row_b.parquet`; run row B on validation by reusing `run_row_a` logic with the extra features (small addition: `run_row(name, feature_parquets: list[Path], …)` generalising `run_row_a`; add a test that `run_row("A", [])` equals `run_row_a`). Record validation metrics for A and B in `docs/results/plan-1-rows-a-b.md`.**
+- [x] **Step 8 (owner, with real data): `compute_row_b` on `data/split/history.parquet` → `data/features/row_b.parquet`; run row B on validation by reusing `run_row_a` logic with the extra features (small addition: `run_row(name, feature_parquets: list[Path], …)` generalising `run_row_a`; add a test that `run_row("A", [])` equals `run_row_a`). Record validation metrics for A and B in `docs/results/plan-1-rows-a-b.md`.**
 
 ---
 
@@ -530,8 +530,8 @@ def test_grid_specs_all_validate() -> None: ...
 - Modify: `README.md` (status, how to reproduce rows A and B on validation), `docs/superpowers/specs/2026-11-02-signal-factory-design.md` (§10 open items: fill in the uid collision rate and the row-B backend decision)
 
 - [x] **Step 1: Update README and spec §10 with measured values (aggregate numbers only)** — done 2026-11-02 for reproduction steps and pointers; measured values await the owner's data runs
-- [ ] **Step 2: `make check`; confirm `git status` shows nothing under `data/` or `results/`**
-- [ ] **Step 3: Commit** `git commit -m "Close plan 1: rows A and B reproducible on validation"`
+- [x] **Step 2: `make check`; confirm `git status` shows nothing under `data/` or `results/`**
+- [x] **Step 3: Commit** `git commit -m "Close plan 1: rows A and B reproducible on validation"`
 
 Plan 2 (proposer, selection, ablation runner, final evaluation lock, report) starts from here.
 

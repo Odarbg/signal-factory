@@ -310,15 +310,19 @@ Steps 1–4 contain no LLM and are roughly half the work.
 
 - The `uid` collision rate (how many distinct `card1–6` combinations share a uid). Report
   it; if it is high, say so prominently and keep the guard as defined.
-  Measured by `signal-factory stats`; value recorded in `docs/results/plan-1-row-a.md`
-  (pending the owner's run on the real data as of 2026-11-02).
+  Measured by `signal-factory stats` on 2026-11-03: 4,333 of 199,070 uids (2.18%) span
+  more than one `card2..card6` tuple. Low; guard kept. Recorded in
+  `docs/results/plan-1-row-a.md`.
 - Whether featuretools' cutoff handling passes the leakage test (section 7 fallback).
-  Decision record: `docs/decisions/row-b-backend.md` (pending the time-boxed run).
+  Decision record: `docs/decisions/row-b-backend.md`. Outcome 2026-11-03: featuretools
+  cannot start under pandas 3 (probe exits 3 on real data); row B was produced by the
+  signal engine, 1,585 s for the full grid, append-later-rows check clean.
 - LightGBM parameter set: chosen once on dev before signals exist, then frozen; the
   values are recorded in the report. Chosen by `scripts/freeze_params.py` (train days
   1–84, holdout 85–98, six candidates, PR-AUC) and committed as
-  `src/signal_factory/baseline/params.json`; the committed file is a placeholder until
-  that one-off run.
+  `src/signal_factory/baseline/params.json` on 2026-11-03 (commit 5287438): num_leaves
+  127, learning_rate 0.02, n_estimators 1000, feature_fraction 0.5, bagging_fraction 0.8,
+  min_child_samples 100; holdout PR-AUC 0.5793.
 
 ## 11. Left to the builder
 
