@@ -381,7 +381,7 @@ def test_load_params_has_required_keys() -> None: assert {"num_leaves","learning
 
 - [x] **Step 5: Commit** `git commit -m "Add fixed-parameter LightGBM learner and parameter freeze script"`
 
-- [ ] **Step 6 (owner, once data is downloaded): run `uv run python scripts/freeze_params.py data/split/dev.parquet`, commit the resulting `params.json` with the printed table in the commit message**
+- [x] **Step 6 (owner, once data is downloaded): run `uv run python scripts/freeze_params.py data/split/dev.parquet`, commit the resulting `params.json` with the printed table in the commit message**
 
 ---
 
